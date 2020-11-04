@@ -22,5 +22,5 @@ android {
 
 dependencies {
     implementation rootProject.ext.dependencies["appcompat"]
-    implementation project(':SplitEditTextView')
+    implementation project(':splitEditTextView')
 }
