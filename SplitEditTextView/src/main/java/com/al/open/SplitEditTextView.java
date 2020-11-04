@@ -18,17 +18,20 @@ import androidx.appcompat.widget.AppCompatEditText;
 
 import java.lang.reflect.Field;
 
-public class SplitEditTextView extends AppCompatEditText{
+public class SplitEditTextView extends AppCompatEditText {
+
     //密码显示模式：隐藏密码,显示圆形
     public static final int CONTENT_SHOW_MODE_PASSWORD = 1;
     //密码显示模式：显示密码
     public static final int CONTENT_SHOW_MODE_TEXT = 2;
+
     //输入框相连的样式
     public static final int INPUT_BOX_STYLE_CONNECT = 1;
     //单个的输入框样式
     public static final int INPUT_BOX_STYLE_SINGLE = 2;
     //下划线输入框样式
     public static final int INPUT_BOX_STYLE_UNDERLINE = 3;
+
     //画笔
     private RectF mRectFConnect;
     private RectF mRectFSingleBox;
@@ -62,9 +65,9 @@ public class SplitEditTextView extends AppCompatEditText{
     private int mTextColor;
     //每个输入框是否是正方形标识
     private boolean mInputBoxSquare;
-    private OnInputListener inputListener;
+    private OnInputListener mInputListener;
     private Paint mPaintCursor;
-    private CursorRunnable cursorRunnable;
+    private CursorRunnable mCursorRunnable;
 
     private int mCursorColor;//光标颜色
     private float mCursorWidth;//光标宽度
@@ -184,13 +187,13 @@ public class SplitEditTextView extends AppCompatEditText{
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        cursorRunnable = new CursorRunnable();
-        postDelayed(cursorRunnable, mCursorDuration);
+        mCursorRunnable = new CursorRunnable();
+        postDelayed(mCursorRunnable, mCursorDuration);
     }
 
     @Override
     protected void onDetachedFromWindow() {
-        removeCallbacks(cursorRunnable);
+        removeCallbacks(mCursorRunnable);
         super.onDetachedFromWindow();
     }
 
@@ -525,7 +528,7 @@ public class SplitEditTextView extends AppCompatEditText{
     }
 
     public void setOnInputListener(OnInputListener listener) {
-        this.inputListener = listener;
+        this.mInputListener = listener;
     }
 
     /**
@@ -535,12 +538,14 @@ public class SplitEditTextView extends AppCompatEditText{
     @Override
     protected void onTextChanged(CharSequence text, int start, int lengthBefore, int lengthAfter) {
         super.onTextChanged(text, start, lengthBefore, lengthAfter);
-        String content = text.toString().trim();
-        if (inputListener != null) {
+        if (mInputListener != null) {
+            String content = text.toString().trim();
+
             if (content.length() == mContentNumber) {
-                inputListener.onInputFinished(content);
+                mInputListener.onInputFinished(content);
+
             } else {
-                inputListener.onInputChanged(content);
+                mInputListener.onInputChanged(content);
             }
         }
     }
@@ -583,6 +588,7 @@ public class SplitEditTextView extends AppCompatEditText{
             invalidate();
             postDelayed(this, mCursorDuration);
         }
+
     }
 
 }
