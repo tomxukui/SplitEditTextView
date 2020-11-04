@@ -53,6 +53,8 @@
         <attr name="underlineNormalColor" format="reference|color" />
         <!--下划线输入框样式下,下划线获取焦点时颜色-->
         <attr name="underlineFocusColor" format="reference|color" />
+        <!--下划线间距-->
+        <attr name="underlinePadding" format="dimension" />
     </declare-styleable>
 
 </resources>

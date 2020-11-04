@@ -88,7 +88,8 @@
             app:inputBoxStyle="underline"
             app:spaceSize="20dp"
             app:underlineFocusColor="#00ff00"
-            app:underlineNormalColor="@color/colorPrimary" />
+            app:underlineNormalColor="@color/colorPrimary"
+            app:underlinePadding="10dp" />
 
     </LinearLayout>
 

@@ -40,7 +40,7 @@ public class SplitEditTextView extends AppCompatEditText {
     private Paint mPaintBorder;
     private Paint mPaintUnderline;
     //边框大小
-    private Float mBorderSize;
+    private float mBorderSize;
     //边框颜色
     private int mBorderColor;
     //圆角大小
@@ -76,6 +76,7 @@ public class SplitEditTextView extends AppCompatEditText {
 
     private int mUnderlineFocusColor;//下划线输入样式下,输入框获取焦点时下划线颜色
     private int mUnderlineNormalColor;//下划线输入样式下,下划线颜色
+    private float mUnderlinePadding;//下划线上间距
 
     public SplitEditTextView(Context context) {
         this(context, null);
@@ -116,6 +117,7 @@ public class SplitEditTextView extends AppCompatEditText {
         mCursorHeight = (int) array.getDimension(R.styleable.SplitEditTextView_cursorHeight, 0);
         mUnderlineNormalColor = array.getInt(R.styleable.SplitEditTextView_underlineNormalColor, Color.BLACK);
         mUnderlineFocusColor = array.getInt(R.styleable.SplitEditTextView_underlineFocusColor, 0);
+        mUnderlinePadding = array.getDimension(R.styleable.SplitEditTextView_underlinePadding, 0);
         array.recycle();
         init();
     }
@@ -208,7 +210,7 @@ public class SplitEditTextView extends AppCompatEditText {
             switch (mInputBoxStyle) {
 
                 case INPUT_BOX_STYLE_UNDERLINE: {
-                    setMeasuredDimension(width, (int) (itemWidth + mBorderSize));
+                    setMeasuredDimension(width, (int) (itemWidth + mBorderSize + 2 * mUnderlinePadding));
                 }
                 break;
 
@@ -293,19 +295,37 @@ public class SplitEditTextView extends AppCompatEditText {
      * 这里光标的长度默认就是 height/2
      */
     private void drawCursor(Canvas canvas) {
-        if (mCursorHeight > getHeight()) {
-            throw new InflateException("cursor height must smaller than view height");
+        int innerHeight;
+        if (mInputBoxStyle == INPUT_BOX_STYLE_UNDERLINE) {
+            innerHeight = (int) (getHeight() - 2 * mUnderlinePadding);
+
+        } else {
+            innerHeight = getHeight();
+        }
+
+        if (mCursorHeight > innerHeight) {
+            throw new InflateException("cursor height must smaller than view height - 2*underlinePadding");
         }
 
         String content = getText().toString().trim();
         float startX = getDrawContentStartX(content.length());
+
         //如果设置得有光标高度,那么startY = (高度-光标高度)/2+边框宽度
         if (mCursorHeight == 0) {
-            mCursorHeight = getHeight() / 2;
+            mCursorHeight = innerHeight / 2;
         }
-        int sy = (getHeight() - mCursorHeight) / 2;
-        float startY = sy + mBorderSize;
-        float stopY = getHeight() - sy - mBorderSize;
+
+        int sy = (innerHeight - mCursorHeight) / 2;
+
+        float startY;
+        if (mInputBoxStyle == INPUT_BOX_STYLE_UNDERLINE) {
+            startY = mUnderlinePadding + sy + mBorderSize;
+
+        } else {
+            startY = sy + mBorderSize;
+        }
+
+        float stopY = startY + mCursorHeight;
 
         //此时的绘制光标竖直线,startX = stopX
         canvas.drawLine(startX, startY, startX, stopY, mPaintCursor);
