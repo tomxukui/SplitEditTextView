@@ -142,7 +142,6 @@ public class SplitEditTextView extends AppCompatEditText {
         mPaintUnderline.setStrokeWidth(mBorderSize);
         mPaintUnderline.setColor(mUnderlineNormalColor);
 
-
         //避免onDraw里面重复创建RectF对象,先初始化RectF对象,在绘制时调用set()方法
         //单个输入框样式的RectF
         mRectFSingleBox = new RectF();
@@ -170,16 +169,18 @@ public class SplitEditTextView extends AppCompatEditText {
         //这里判断版本,10.0以及以上直接通过方法调用,以下通过反射设置
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             setTextSelectHandle(android.R.color.transparent);
+
         } else {
             //通过反射改变光标TextSelectHandle的样式
             try {
                 Field f = TextView.class.getDeclaredField("mTextSelectHandleRes");
                 f.setAccessible(true);
                 f.set(this, android.R.color.transparent);
+
             } catch (Exception e) {
-                e.printStackTrace();
             }
         }
+
         //设置InputFilter,设置输入的最大字符长度为设置的长度
         setFilters(new InputFilter[]{new InputFilter.LengthFilter(mContentNumber)});
     }
@@ -200,20 +201,24 @@ public class SplitEditTextView extends AppCompatEditText {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
         if (mInputBoxSquare) {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             //计算view高度,使view高度和每个item的宽度相等,确保每个item是一个正方形
             float itemWidth = getContentItemWidthOnMeasure(width);
             switch (mInputBoxStyle) {
-                case INPUT_BOX_STYLE_UNDERLINE:
+
+                case INPUT_BOX_STYLE_UNDERLINE: {
                     setMeasuredDimension(width, (int) (itemWidth + mBorderSize));
-                    break;
+                }
+                break;
+
                 case INPUT_BOX_STYLE_SINGLE:
                 case INPUT_BOX_STYLE_CONNECT:
-                default:
+                default: {
                     setMeasuredDimension(width, (int) (itemWidth + mBorderSize * 2));
-                    break;
+                }
+                break;
+
             }
         }
     }
@@ -222,19 +227,28 @@ public class SplitEditTextView extends AppCompatEditText {
     protected void onDraw(Canvas canvas) {
         //绘制输入框
         switch (mInputBoxStyle) {
-            case INPUT_BOX_STYLE_SINGLE:
+
+            case INPUT_BOX_STYLE_SINGLE: {
                 drawSingleStyle(canvas);
-                break;
-            case INPUT_BOX_STYLE_UNDERLINE:
+            }
+            break;
+
+            case INPUT_BOX_STYLE_UNDERLINE: {
                 drawUnderlineStyle(canvas);
-                break;
+            }
+            break;
+
             case INPUT_BOX_STYLE_CONNECT:
-            default:
+            default: {
                 drawConnectStyle(canvas);
-                break;
+            }
+            break;
+
         }
+
         //绘制输入框内容
         drawContent(canvas);
+
         //绘制光标
         drawCursor(canvas);
     }
@@ -245,12 +259,14 @@ public class SplitEditTextView extends AppCompatEditText {
     private void drawContent(Canvas canvas) {
         int cy = getHeight() / 2;
         String password = getText().toString().trim();
+
         if (mContentShowMode == CONTENT_SHOW_MODE_PASSWORD) {
             mPaintContent.setColor(Color.BLACK);
             for (int i = 0; i < password.length(); i++) {
                 float startX = getDrawContentStartX(i);
                 canvas.drawCircle(startX, cy, mCircleRadius, mPaintContent);
             }
+
         } else {
             mPaintContent.setColor(mTextColor);
             //计算baseline
@@ -280,6 +296,7 @@ public class SplitEditTextView extends AppCompatEditText {
         if (mCursorHeight > getHeight()) {
             throw new InflateException("cursor height must smaller than view height");
         }
+
         String content = getText().toString().trim();
         float startX = getDrawContentStartX(content.length());
         //如果设置得有光标高度,那么startY = (高度-光标高度)/2+边框宽度
@@ -295,13 +312,13 @@ public class SplitEditTextView extends AppCompatEditText {
     }
 
     /**
-     * 、
      * 计算三种输入框样式下绘制圆和文字的x坐标
      *
      * @param index 循环里面的下标 i
      */
     private float getDrawContentStartX(int index) {
         switch (mInputBoxStyle) {
+
             case INPUT_BOX_STYLE_SINGLE:
                 //单个输入框样式下的startX
                 //即 itemWidth/2 + i*itemWidth + i*每一个间距宽度 + 前面所有的左右边框
@@ -309,15 +326,18 @@ public class SplitEditTextView extends AppCompatEditText {
                 //   i = 1,左侧3个边框(一个完整的item的左右边框+ 一个左侧边框)
                 //   i = ..., (2*i+1)*mBorderSize
                 return getContentItemWidth() / 2 + index * getContentItemWidth() + index * mSpaceSize + (2 * index + 1) * mBorderSize;
+
             case INPUT_BOX_STYLE_UNDERLINE:
                 //下划线输入框样式下的startX
                 //即 itemWidth/2 + i*itemWidth + i*每一个间距宽度
                 return getContentItemWidth() / 2 + index * mSpaceSize + index * getContentItemWidth();
+
             case INPUT_BOX_STYLE_CONNECT:
                 //矩形输入框样式下的startX
                 //即 itemWidth/2 + i*itemWidth + i*分割线宽度 + 左侧的一个边框宽度
             default:
                 return getContentItemWidth() / 2 + index * getContentItemWidth() + index * mDivisionLineSize + mBorderSize;
+
         }
     }
 
@@ -340,6 +360,7 @@ public class SplitEditTextView extends AppCompatEditText {
             if (mUnderlineFocusColor != 0) {
                 if (content.length() >= i) {
                     mPaintUnderline.setColor(mUnderlineFocusColor);
+
                 } else {
                     mPaintUnderline.setColor(mUnderlineNormalColor);
                 }
@@ -426,20 +447,25 @@ public class SplitEditTextView extends AppCompatEditText {
         //计算每个密码字符所占的宽度,每种输入框样式下,每个字符item所占宽度也不一样
         float tempWidth;
         switch (mInputBoxStyle) {
+
             case INPUT_BOX_STYLE_SINGLE:
                 //单个输入框样式：宽度-间距宽度(字符数-1)*每个间距宽度-每个输入框的左右边框宽度
                 tempWidth = getWidth() - (mContentNumber - 1) * mSpaceSize - 2 * mContentNumber * mBorderSize;
                 break;
+
             case INPUT_BOX_STYLE_UNDERLINE:
                 //下划线样式：宽度-间距宽度(字符数-1)*每个间距宽度
                 tempWidth = getWidth() - (mContentNumber - 1) * mSpaceSize;
                 break;
+
             case INPUT_BOX_STYLE_CONNECT:
                 //矩形输入框样式：宽度-左右两边框宽度-分割线宽度(字符数-1)*每个分割线宽度
             default:
                 tempWidth = getWidth() - (mDivisionLineSize * (mContentNumber - 1)) - 2 * mBorderSize;
                 break;
+
         }
+
         return tempWidth / mContentNumber;
     }
 
@@ -453,20 +479,25 @@ public class SplitEditTextView extends AppCompatEditText {
         //计算每个密码字符所占的宽度,每种输入框样式下,每个字符item所占宽度也不一样
         float tempWidth;
         switch (mInputBoxStyle) {
+
             case INPUT_BOX_STYLE_SINGLE:
                 //单个输入框样式：宽度-间距宽度(字符数-1)*每个间距宽度-每个输入框的左右边框宽度
                 tempWidth = measureWidth - (mContentNumber - 1) * mSpaceSize - 2 * mContentNumber * mBorderSize;
                 break;
+
             case INPUT_BOX_STYLE_UNDERLINE:
                 //下划线样式：宽度-间距宽度(字符数-1)*每个间距宽度
                 tempWidth = measureWidth - (mContentNumber - 1) * mSpaceSize;
                 break;
+
             case INPUT_BOX_STYLE_CONNECT:
                 //矩形输入框样式：宽度-左右两边框宽度-分割线宽度(字符数-1)*每个分割线宽度
             default:
                 tempWidth = measureWidth - (mDivisionLineSize * (mContentNumber - 1)) - 2 * mBorderSize;
                 break;
+
         }
+
         return tempWidth / mContentNumber;
     }
 
