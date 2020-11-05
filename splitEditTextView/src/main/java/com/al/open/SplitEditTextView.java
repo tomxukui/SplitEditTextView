@@ -10,6 +10,7 @@ import android.graphics.RectF;
 import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 
 import androidx.appcompat.widget.AppCompatEditText;
 
@@ -142,11 +143,18 @@ public class SplitEditTextView extends AppCompatEditText {
         //设置单行输入
         setSingleLine();
 
-        setMovementMethod(null);
-        setCursorVisible(false);
-
         //若构造方法中没有写成android.R.attr.editTextStyle的属性,应该需要设置该属性,EditText默认是获取焦点的
         setFocusableInTouchMode(true);
+        setMovementMethod(null);
+        setCursorVisible(false);
+        setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                setSelection(getText().length());
+            }
+
+        });
 
         //设置InputFilter,设置输入的最大字符长度为设置的长度
         setFilters(new InputFilter[]{new InputFilter.LengthFilter(mContentNumber)});
