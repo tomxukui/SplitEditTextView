@@ -11,7 +11,6 @@ import android.os.Build;
 import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.view.InflateException;
 import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatEditText;
@@ -82,14 +81,9 @@ public class SplitEditTextView extends AppCompatEditText {
         this(context, null);
     }
 
-    //这里没有写成默认的EditText属性样式android.R.attr.editTextStyle,这样会存在EditText默认的样式
     public SplitEditTextView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
-    /*public SplitEditTextView(Context context, AttributeSet attrs) {
-        super(context, attrs, android.R.attr.editTextStyle);
-        initAttrs(context, attrs);
-    }*/
 
     public SplitEditTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
@@ -303,16 +297,15 @@ public class SplitEditTextView extends AppCompatEditText {
             innerHeight = getHeight();
         }
 
-        if (mCursorHeight > innerHeight) {
-            throw new InflateException("cursor height must smaller than view height - 2*underlinePadding");
-        }
-
         String content = getText().toString().trim();
         float startX = getDrawContentStartX(content.length());
 
         //如果设置得有光标高度,那么startY = (高度-光标高度)/2+边框宽度
-        if (mCursorHeight == 0) {
+        if (mCursorHeight <= 0) {
             mCursorHeight = innerHeight / 2;
+
+        } else if (mCursorHeight > innerHeight) {
+            mCursorHeight = innerHeight;
         }
 
         int sy = (innerHeight - mCursorHeight) / 2;
