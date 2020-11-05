@@ -8,13 +8,14 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.text.InputFilter;
+import android.text.method.BaseMovementMethod;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.View;
+import android.widget.EditText;
 
-import androidx.appcompat.widget.AppCompatEditText;
-
-public class SplitEditTextView extends AppCompatEditText {
+public class SplitEditTextView extends EditText {
 
     //密码显示模式：隐藏密码,显示圆形
     public static final int CONTENT_SHOW_MODE_PASSWORD = 1;
@@ -75,11 +76,13 @@ public class SplitEditTextView extends AppCompatEditText {
     private float mUnderlinePadding;//下划线上间距
 
     public SplitEditTextView(Context context) {
-        this(context, null);
+        super(context);
+        initAttrs(context, null);
     }
 
     public SplitEditTextView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        initAttrs(context, attrs);
     }
 
     public SplitEditTextView(Context context, AttributeSet attrs, int defStyleAttr) {
@@ -87,33 +90,36 @@ public class SplitEditTextView extends AppCompatEditText {
         initAttrs(context, attrs);
     }
 
-    private void initAttrs(Context c, AttributeSet attrs) {
-        TypedArray array = c.obtainStyledAttributes(attrs, R.styleable.SplitEditTextView);
-        mBorderSize = array.getDimension(R.styleable.SplitEditTextView_borderSize, dp2px(1f));
-        mBorderColor = array.getColor(R.styleable.SplitEditTextView_borderColor, Color.BLACK);
-        mCornerSize = array.getDimension(R.styleable.SplitEditTextView_corner_size, 0f);
-        mDivisionLineSize = array.getDimension(R.styleable.SplitEditTextView_divisionLineSize, dp2px(1f));
-        mDivisionColor = array.getColor(R.styleable.SplitEditTextView_divisionLineColor, Color.BLACK);
-        mCircleRadius = array.getDimension(R.styleable.SplitEditTextView_circleRadius, dp2px(5f));
-        mContentNumber = array.getInt(R.styleable.SplitEditTextView_contentNumber, 6);
-        mContentShowMode = array.getInteger(R.styleable.SplitEditTextView_contentShowMode, CONTENT_SHOW_MODE_PASSWORD);
-        mInputBoxStyle = array.getInteger(R.styleable.SplitEditTextView_inputBoxStyle, INPUT_BOX_STYLE_CONNECT);
-        mSpaceSize = array.getDimension(R.styleable.SplitEditTextView_spaceSize, dp2px(10f));
-        mTextSize = array.getDimension(R.styleable.SplitEditTextView_android_textSize, sp2px(16f));
-        mTextColor = array.getColor(R.styleable.SplitEditTextView_android_textColor, Color.BLACK);
-        mInputBoxSquare = array.getBoolean(R.styleable.SplitEditTextView_inputBoxSquare, true);
-        mCursorColor = array.getColor(R.styleable.SplitEditTextView_cursorColor, Color.BLACK);
-        mCursorDuration = array.getInt(R.styleable.SplitEditTextView_cursorDuration, 500);
-        mCursorWidth = array.getDimension(R.styleable.SplitEditTextView_cursorWidth, dp2px(2f));
-        mCursorHeight = (int) array.getDimension(R.styleable.SplitEditTextView_cursorHeight, 0);
-        mUnderlineNormalColor = array.getInt(R.styleable.SplitEditTextView_underlineNormalColor, Color.BLACK);
-        mUnderlineFocusColor = array.getInt(R.styleable.SplitEditTextView_underlineFocusColor, 0);
-        mUnderlinePadding = array.getDimension(R.styleable.SplitEditTextView_underlinePadding, 0);
-        array.recycle();
-        init();
+    private void initAttrs(Context context, AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.SplitEditTextView);
+            mBorderSize = array.getDimension(R.styleable.SplitEditTextView_borderSize, dp2px(1f));
+            mBorderColor = array.getColor(R.styleable.SplitEditTextView_borderColor, Color.BLACK);
+            mCornerSize = array.getDimension(R.styleable.SplitEditTextView_corner_size, 0f);
+            mDivisionLineSize = array.getDimension(R.styleable.SplitEditTextView_divisionLineSize, dp2px(1f));
+            mDivisionColor = array.getColor(R.styleable.SplitEditTextView_divisionLineColor, Color.BLACK);
+            mCircleRadius = array.getDimension(R.styleable.SplitEditTextView_circleRadius, dp2px(5f));
+            mContentNumber = array.getInt(R.styleable.SplitEditTextView_contentNumber, 6);
+            mContentShowMode = array.getInteger(R.styleable.SplitEditTextView_contentShowMode, CONTENT_SHOW_MODE_PASSWORD);
+            mInputBoxStyle = array.getInteger(R.styleable.SplitEditTextView_inputBoxStyle, INPUT_BOX_STYLE_CONNECT);
+            mSpaceSize = array.getDimension(R.styleable.SplitEditTextView_spaceSize, dp2px(10f));
+            mTextSize = array.getDimension(R.styleable.SplitEditTextView_android_textSize, sp2px(16f));
+            mTextColor = array.getColor(R.styleable.SplitEditTextView_android_textColor, Color.BLACK);
+            mInputBoxSquare = array.getBoolean(R.styleable.SplitEditTextView_inputBoxSquare, true);
+            mCursorColor = array.getColor(R.styleable.SplitEditTextView_cursorColor, Color.BLACK);
+            mCursorDuration = array.getInt(R.styleable.SplitEditTextView_cursorDuration, 500);
+            mCursorWidth = array.getDimension(R.styleable.SplitEditTextView_cursorWidth, dp2px(2f));
+            mCursorHeight = (int) array.getDimension(R.styleable.SplitEditTextView_cursorHeight, 0);
+            mUnderlineNormalColor = array.getInt(R.styleable.SplitEditTextView_underlineNormalColor, Color.BLACK);
+            mUnderlineFocusColor = array.getInt(R.styleable.SplitEditTextView_underlineFocusColor, 0);
+            mUnderlinePadding = array.getDimension(R.styleable.SplitEditTextView_underlinePadding, 0);
+            array.recycle();
+        }
+
+        initView();
     }
 
-    private void init() {
+    private void initView() {
         mPaintBorder = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaintBorder.setStyle(Paint.Style.STROKE);
         mPaintBorder.setStrokeWidth(mBorderSize);
@@ -143,21 +149,25 @@ public class SplitEditTextView extends AppCompatEditText {
         //设置单行输入
         setSingleLine();
 
-        //若构造方法中没有写成android.R.attr.editTextStyle的属性,应该需要设置该属性,EditText默认是获取焦点的
-        setFocusableInTouchMode(true);
-        setMovementMethod(null);
+        setMovementMethod(new BaseMovementMethod());
         setCursorVisible(false);
-        setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                setSelection(getText().length());
-            }
-
-        });
 
         //设置InputFilter,设置输入的最大字符长度为设置的长度
         setFilters(new InputFilter[]{new InputFilter.LengthFilter(mContentNumber)});
+
+        //监听删除键
+        setOnKeyListener(new OnKeyListener() {
+
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_DEL) {
+                    setSelection(getText().length());
+                }
+
+                return false;
+            }
+
+        });
     }
 
     @Override
@@ -171,6 +181,7 @@ public class SplitEditTextView extends AppCompatEditText {
     protected void onDetachedFromWindow() {
         if (mCursorRunnable != null) {
             removeCallbacks(mCursorRunnable);
+            mCursorRunnable = null;
         }
         super.onDetachedFromWindow();
     }
