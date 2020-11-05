@@ -7,15 +7,11 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.os.Build;
 import android.text.InputFilter;
 import android.util.AttributeSet;
 import android.util.TypedValue;
-import android.widget.TextView;
 
 import androidx.appcompat.widget.AppCompatEditText;
-
-import java.lang.reflect.Field;
 
 public class SplitEditTextView extends AppCompatEditText {
 
@@ -146,36 +142,11 @@ public class SplitEditTextView extends AppCompatEditText {
         //设置单行输入
         setSingleLine();
 
+        setMovementMethod(null);
+        setCursorVisible(false);
+
         //若构造方法中没有写成android.R.attr.editTextStyle的属性,应该需要设置该属性,EditText默认是获取焦点的
         setFocusableInTouchMode(true);
-
-        //取消默认的光标
-        //这里默认不设置该属性,不然长按粘贴有问题(一开始长按不能粘贴,输入内容就可以长按粘贴)
-        //setCursorVisible(false);
-
-        //设置透明光标,若是直接不显示光标的话,长按粘贴会没效果
-        /*try {
-            Field f = TextView.class.getDeclaredField("mCursorDrawableRes");
-            f.setAccessible(true);
-            f.set(this, 0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        //设置光标的TextSelectHandle
-        //这里判断版本,10.0以及以上直接通过方法调用,以下通过反射设置
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            setTextSelectHandle(android.R.color.transparent);
-
-        } else {
-            //通过反射改变光标TextSelectHandle的样式
-            try {
-                Field f = TextView.class.getDeclaredField("mTextSelectHandleRes");
-                f.setAccessible(true);
-                f.set(this, android.R.color.transparent);
-
-            } catch (Exception e) {
-            }
-        }
 
         //设置InputFilter,设置输入的最大字符长度为设置的长度
         setFilters(new InputFilter[]{new InputFilter.LengthFilter(mContentNumber)});
@@ -190,7 +161,9 @@ public class SplitEditTextView extends AppCompatEditText {
 
     @Override
     protected void onDetachedFromWindow() {
-        removeCallbacks(mCursorRunnable);
+        if (mCursorRunnable != null) {
+            removeCallbacks(mCursorRunnable);
+        }
         super.onDetachedFromWindow();
     }
 
@@ -201,6 +174,7 @@ public class SplitEditTextView extends AppCompatEditText {
             int width = MeasureSpec.getSize(widthMeasureSpec);
             //计算view高度,使view高度和每个item的宽度相等,确保每个item是一个正方形
             float itemWidth = getContentItemWidthOnMeasure(width);
+
             switch (mInputBoxStyle) {
 
                 case INPUT_BOX_STYLE_UNDERLINE: {
